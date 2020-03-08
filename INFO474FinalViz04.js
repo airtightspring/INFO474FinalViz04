@@ -331,6 +331,17 @@
 
     let values = result[1];
 
+    let total = 0;
+
+    for (let i = 0; i < acc_data.length; i++) {
+      total = total + acc_data[i];
+    }
+
+    let average = total / acc_data.length;
+
+    average = average.toFixed(2);
+
+
     var svg = tipSVG,
         width = svg.attr("width"),
         height = svg.attr("height"),
@@ -362,7 +373,7 @@
         })
         .attr("d", arc);
 
-    makeColorKey(colors, keys, tipSVG, current);
+    makeColorKey(colors, keys, tipSVG, current, average);
 
   
   }
@@ -384,7 +395,7 @@
     return [a, b];
 }
 
-function makeColorKey(colors, labels, svg, accommodation) {
+function makeColorKey(colors, labels, svg, accommodation, average) {
   let colorValues = colors;
   let labelValues = labels;
 
@@ -434,8 +445,16 @@ function makeColorKey(colors, labels, svg, accommodation) {
   .attr("class", "type label")
   .attr("text-anchor", "beginning")
   .attr("x", 0)
-  .attr("y", 280)
+  .attr("y", 260)
   .attr("font-size", 14)
   .text("Accommodation Number: " + accommodation);
+
+  svg.append("text")
+  .attr("class", "type label")
+  .attr("text-anchor", "beginning")
+  .attr("x", 0)
+  .attr("y", 280)
+  .attr("font-size", 14)
+  .text("Average Rating: " + average);
 }
 })();
