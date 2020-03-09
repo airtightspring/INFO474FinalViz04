@@ -447,7 +447,7 @@ function makeColorKey(colors, labels, svg, accommodation, average) {
   .attr("x", 0)
   .attr("y", 260)
   .attr("font-size", 14)
-  .text("Accommodation Number: " + accommodation);
+  .text("Accommodation Number Testing Update: " + accommodation);
 
   svg.append("text")
   .attr("class", "type label")
