@@ -28,12 +28,12 @@
 
     data = data.filter(d => d['accommodates'] != null);
 
-    // get arrays of fertility rate data and life Expectancy data
-    let fertility_rate_data = data.map((row) => parseFloat(row["accommodates"]));
-    let life_expectancy_data = data.map((row) => parseFloat(row["price"]));
+    // get arrays of accommodation and price data
+    let accommodates_data = data.map((row) => parseFloat(row["accommodates"]));
+    let price_data = data.map((row) => parseFloat(row["price"]));
 
     // find data limits
-    let axesLimits = findMinMax(fertility_rate_data, life_expectancy_data);
+    let axesLimits = findMinMax(accommodates_data, price_data);
 
     // draw axes and return scaling + mapping functions
     let mapFunctions = drawAxes(axesLimits, "accommodates", "price");
@@ -63,13 +63,6 @@
   // plot all the data points on the SVG
   // and add tooltip functionality
   function plotData(map, originalData) {
-    // get population data as array
-    /*let pop_data = data.map((row) => +row["population"]);
-    let pop_limits = d3.extent(pop_data);
-    // make size scaling function for population
-    let pop_map_func = d3.scaleLinear()
-      .domain([pop_limits[0], pop_limits[1]])
-      .range([3, 20]); */
 
     // mapping functions
     let xMap = map.x;
@@ -108,29 +101,13 @@
 
           let current = d.accommodates;
 
-          // make line graph within tooltip of population over time for given country
-          //makeLineGraph(data, tipSVG, originalData, current);
-
-          makePie(tipSVG, data, originalData, current);
+          makePie(tipSVG, originalData, current);
         })
         .on("mouseout", (d) => {
           div.transition()
             .duration(500)
             .style("opacity", 0);
         }); 
-
-        // adds labels to certain countries
-        /* = data.filter(d => d['population'] >= 100000000);
-        console.log(data);
-        svgContainer.selectAll('.text')
-          .data(data)
-          .enter()
-          .append('text')
-          .attr('x', xMap)
-          .attr('y', yMap)
-          .style('font-size', '10pt')
-          .text(d => d.country)
-          .attr('transform', 'translate(20, 5)');*/
 
   }
 
@@ -199,149 +176,42 @@
     }
   }
 
+  function makePie(tipSVG, originalData, current) {
 
-  // Section for creating line graph
-  function makeLineGraph(csvData, lineSVG, originalData, currentCountry) {
-    data = originalData // assign data as global variable
-
-    // filters original data by country and valid population data
-    data = data.filter(d => d['accommodates'] == currentCountry);
-    //data = data.filter(d => d['population'] != "NA");
-
-    // get arrays of year and population data
-    let year_data = data.map((row) => parseFloat(row["overall_satisfaction"]));
-    let pop_data = data.map((row) => parseFloat(row["price"]));
-
-    // find data limits
-    let axesLimits = findMinMax(year_data, pop_data);
-
-    // draw axes and return scaling + mapping functions
-    let mapFunctions = drawLineAxes(axesLimits, "overall_satisfaction", "price", lineSVG);
-
-    // plot data as points and add tooltip functionality
-    plotLineData(mapFunctions, lineSVG, data);
-
-    // draw title and axes labels
-    makeLineLabels(lineSVG);
-
-  }
-
-  // make title and axes labels
-  function makeLineLabels(lineSVG) {
-    lineSVG.append('text')
-      .attr('x', 90)
-      .attr('y', 20)
-      .style('font-size', '13pt')
-      .text("Price vs Satisfaction");
-
-      lineSVG.append('text')
-      .attr('x', 93)
-      .attr('y', 34)
-      .style('font-size', '10pt')
-      .text("For Homes with X People");
-
-    lineSVG.append('text')
-      .attr('x', 175)
-      .attr('y', 290)
-      .style('font-size', '10pt')
-      .text('Satisfaction');
-
-    lineSVG.append('text')
-      .attr('transform', 'translate(10, 150)rotate(-90)')
-      .style('font-size', '10pt')
-      .text('Price');
-  }
-
-  // plots line of population over time for given country
-  function plotLineData(map, lineSVG, countryData) {
-    let xMap = map.x;
-    let yMap = map.y;
-    
-    lineSVG.selectAll('.dot')
-    .data(countryData)
-    .enter()
-    .append('circle')
-      .attr('cx', xMap)
-      .attr('cy', yMap)
-      .attr('r', 4)
-      .attr('fill', "#4286f4")
-      .attr('class', 'dot')
-  }
-
-  // draw the axes and ticks
-  function drawLineAxes(limits, x, y, lineSVG) {
-    // return x value from a row of data
-    let xValue = function(d) { return +d[x]; }
-
-    // function to scale x value
-    let xScale = d3.scaleLinear()
-      .domain([limits.xMin - 0.5, limits.xMax + 0.5]) // give domain buffer room
-      .range([50, 290]);
-
-    // xMap returns a scaled x value from a row of data
-    let xMap = function(d) { return xScale(xValue(d)); };
-
-    // plot x-axis at bottom of SVG
-    let xAxis = d3.axisBottom().scale(xScale);
-    lineSVG.append("g")
-      .attr('transform', 'translate(0, 250)')
-      .call(xAxis);
-
-    // return y value from a row of data
-    let yValue = function(d) { return +d[y]}
-
-    // function to scale y
-    let yScale = d3.scaleLinear()
-      .domain([limits.yMax + 5, limits.yMin - 5]) // give domain buffer
-      .range([50, 250]);
-
-    // yMap returns a scaled y value from a row of data
-    let yMap = function (d) { return yScale(yValue(d)); };
-
-    // plot y-axis at the left of SVG
-    let yAxis = d3.axisLeft().scale(yScale);
-    lineSVG.append('g')
-      .attr('transform', 'translate(50, 0)')
-      .call(yAxis);
-
-    // return mapping and scaling functions
-    return {
-      x: xMap,
-      y: yMap,
-      xScale: xScale,
-      yScale: yScale
-    };
-  }
-
-  function makePie(tipSVG, myData, originalData, current) {
-
+    // assign original data
     var newData = originalData;
 
+
+    // filter data by passed accommodates and overall satisfaction valid values
     newData = newData.filter(d => d['accommodates'] == current);
 
     newData = newData.filter(d => d['overall_satisfaction'] > 0);
 
-    let acc_data = newData.map((row) => parseFloat(row["overall_satisfaction"]));
+    // get the satisfaction data
+    let satis_data = newData.map((row) => parseFloat(row["overall_satisfaction"]));
 
-    let result = foo(acc_data);
+    // arange data into a result map that is then split into a key and vavues array
+    let result = dataArranger(satis_data);
 
     let keys = result[0];
-
-    let colors = [];
-
     let values = result[1];
 
+    // array to hold color keys
+    let colors = [];
+
+    // calculate the average rating for all houses of a given accommodation size
     let total = 0;
 
-    for (let i = 0; i < acc_data.length; i++) {
-      total = total + acc_data[i];
+    for (let i = 0; i < satis_data.length; i++) {
+      total = total + satis_data[i];
     }
 
-    let average = total / acc_data.length;
+    let average = total / satis_data.length;
 
     average = average.toFixed(2);
 
 
+    // set up pie chart
     var svg = tipSVG,
         width = svg.attr("width"),
         height = svg.attr("height"),
@@ -350,22 +220,19 @@
 
     var color = d3.scaleOrdinal(['#4daf4a','#377eb8','#ff7f00','#984ea3','#e41a1c']);
 
-    // Generate the pie
+    // generate pie chart
     var pie = d3.pie();
 
-    // Generate the arcs
     var arc = d3.arc()
                 .innerRadius(0)
                 .outerRadius(radius);
 
-    //Generate groups
     var arcs = g.selectAll("arc")
                 .data(pie(values))
                 .enter()
                 .append("g")
                 .attr("class", "arc")
 
-    //Draw arc paths
     arcs.append("path")
         .attr("fill", function(d, i) {
             colors[i] = color(i);
@@ -373,28 +240,32 @@
         })
         .attr("d", arc);
 
+
+    // append color key and titles for pie chart
     makeColorKey(colors, keys, tipSVG, current, average);
 
   
   }
 
-  function foo(arr) {
+  // sorts data into an array of arrays with keys and values
+  function dataArranger(data) {
     var a = [], b = [], prev;
 
-    arr.sort();
-    for ( var i = 0; i < arr.length; i++ ) {
-        if ( arr[i] !== prev ) {
-            a.push(arr[i]);
+    data.sort();
+    for ( var i = 0; i < data.length; i++ ) {
+        if ( data[i] !== prev ) {
+            a.push(data[i]);
             b.push(1);
         } else {
             b[b.length-1]++;
         }
-        prev = arr[i];
+        prev = data[i];
     }
 
     return [a, b];
 }
 
+// creates a key for colors and adds titles
 function makeColorKey(colors, labels, svg, accommodation, average) {
   let colorValues = colors;
   let labelValues = labels;
@@ -424,6 +295,7 @@ function makeColorKey(colors, labels, svg, accommodation, average) {
     .attr("font-size", 12)
     .text("Customer Rating Key");
 
+  // adds colors for every color in the key
   for (let i = 0; i < colorValues.length; i++) {
       svg.append("rect")
       .attr("width", 10)
